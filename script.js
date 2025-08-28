@@ -51,6 +51,9 @@ const squares = [
 
 function loadPlayers() {
   players = JSON.parse(localStorage.getItem('players') || '[]');
+  players.forEach((p) => {
+    if (p.chanceUsed === undefined) p.chanceUsed = false;
+  });
 }
 
 function savePlayers() {
@@ -93,7 +96,7 @@ function createBoard() {
       if (player.position !== i) return;
       if (!squares[i].type) {
         showPropertyModal(i, player);
-      } else if (squares[i].type === 'chance') {
+      } else if (squares[i].type === 'chance' && !player.chanceUsed) {
         showChanceModal(player);
       }
     });
@@ -131,6 +134,7 @@ function movePlayer(id, steps) {
     newPos = squares.findIndex((s) => s.type === 'jail');
   }
   player.position = newPos;
+  player.chanceUsed = false;
   savePlayers();
   renderBoard();
   if (playerIdParam === 'bank') {
@@ -152,7 +156,15 @@ function setupBankerControls() {
     if (!name || players.length >= 6) return;
     const id = Date.now().toString();
     const color = colors[players.length % colors.length];
-    players.push({ id, name, color, position: 0, balance: 1500, properties: [] });
+    players.push({
+      id,
+      name,
+      color,
+      position: 0,
+      balance: 1500,
+      properties: [],
+      chanceUsed: false,
+    });
     savePlayers();
     renderBoard();
     updateBankerList();
@@ -242,32 +254,45 @@ function updatePlayerInfo(id) {
 }
 
 function showDiceRoll(result) {
-  const dice = document.getElementById('dice');
-  if (!dice) return;
-  dice.style.display = 'block';
-  let count = 0;
-  const interval = setInterval(() => {
-    dice.textContent = Math.floor(Math.random() * 6) + 1;
-    count++;
-    if (count > 10) {
-      clearInterval(interval);
-      dice.textContent = result;
-      setTimeout(() => {
-        dice.style.display = 'none';
-      }, 1000);
+  return new Promise((resolve) => {
+    const dice = document.getElementById('dice');
+    if (!dice) {
+      resolve();
+      return;
     }
-  }, 100);
+    dice.style.display = 'block';
+    let count = 0;
+    const interval = setInterval(() => {
+      dice.textContent = Math.floor(Math.random() * 6) + 1;
+      count++;
+      if (count > 10) {
+        clearInterval(interval);
+        dice.textContent = result;
+        setTimeout(() => {
+          dice.style.display = 'none';
+          resolve();
+        }, 1000);
+      }
+    }, 100);
+  });
 }
 
 function rollDice(id) {
-  const roll = Math.floor(Math.random() * 6) + 1 + Math.floor(Math.random() * 6) + 1;
-  movePlayer(id, roll);
-  localStorage.setItem('lastRoll', JSON.stringify({ result: roll, time: Date.now() }));
-  showDiceRoll(roll);
+  const roll =
+    Math.floor(Math.random() * 6) + 1 + Math.floor(Math.random() * 6) + 1;
+  localStorage.setItem(
+    'lastRoll',
+    JSON.stringify({ result: roll, time: Date.now() })
+  );
+  showDiceRoll(roll).then(() => {
+    movePlayer(id, roll);
+  });
 }
 
 function showChanceModal(player) {
-  if (!chanceCards.length) return;
+  if (!chanceCards.length || player.chanceUsed) return;
+  player.chanceUsed = true;
+  savePlayers();
   currentChance = chanceCards[Math.floor(Math.random() * chanceCards.length)];
   document.getElementById('chanceText').textContent = currentChance.text;
   document.getElementById('chanceModal').classList.remove('hidden');
