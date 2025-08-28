@@ -78,9 +78,13 @@ function loadPlayers() {
     if (p.chanceUsed === undefined) p.chanceUsed = false;
     if (p.inJail === undefined) p.inJail = false;
     if (!p.properties) p.properties = [];
-    p.properties = p.properties.map((pr) =>
-      typeof pr === 'string' ? { name: pr, houses: 1 } : pr
-    );
+    p.properties = p.properties.map((pr) => {
+      if (typeof pr === 'string') {
+        return { name: pr, houses: 1, canAddHouse: false };
+      }
+      if (pr.canAddHouse === undefined) pr.canAddHouse = false;
+      return pr;
+    });
     p.properties.forEach((pr) => {
       const sq = squares.find((s) => s.name === pr.name);
       if (sq) {
@@ -225,6 +229,11 @@ function movePlayer(id, steps) {
   }
   player.position = newPos;
   player.chanceUsed = false;
+  player.properties.forEach((pr) => (pr.canAddHouse = false));
+  if (squares[newPos].owner === player.id) {
+    const prop = player.properties.find((pr) => pr.name === squares[newPos].name);
+    if (prop) prop.canAddHouse = true;
+  }
   savePlayers();
   renderBoard();
   if (playerIdParam === 'bank') {
@@ -537,7 +546,7 @@ function showPropertyModal(index, player) {
   } else if (propObj) {
     buyBtn.style.display = 'none';
     rentSection.classList.add('hidden');
-    if (square.houses < 3) {
+    if (square.houses < 3 && propObj.canAddHouse) {
       const housePrice = Math.floor(price / 2);
       addHouseBtn.style.display = 'block';
       addHouseBtn.textContent = `Adicionar residência (${housePrice})`;
@@ -547,11 +556,13 @@ function showPropertyModal(index, player) {
           square.houses++;
           square.rent = square.rents[square.houses - 1];
           propObj.houses = square.houses;
+          propObj.canAddHouse = false;
           infoEl.textContent = `Preço: ${price} - Aluguel: ${square.rent}`;
           houseIcons.textContent = '🏠'.repeat(square.houses);
           savePlayers();
           updatePlayerInfo(player.id);
           renderBoard();
+          addHouseBtn.style.display = 'none';
         }
       };
     }
@@ -561,7 +572,7 @@ function showPropertyModal(index, player) {
     buyBtn.onclick = () => {
       if (player.balance >= price) {
         player.balance -= price;
-        player.properties.push({ name: square.name, houses: 1 });
+        player.properties.push({ name: square.name, houses: 1, canAddHouse: false });
         square.owner = player.id;
         square.houses = 1;
         square.rent = square.rents[0];
