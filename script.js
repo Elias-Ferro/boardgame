@@ -3,6 +3,8 @@ const playerIdParam = urlParams.get('player');
 
 const colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange'];
 let players = [];
+let chanceCards = [];
+let currentChance = null;
 
 const squares = [
   { name: 'Partida', type: 'start' },
@@ -88,8 +90,11 @@ function createBoard() {
       if (!playerIdParam || playerIdParam === 'bank') return;
       const player = players.find((p) => p.id === playerIdParam);
       if (!player) return;
-      if (player.position === i && !squares[i].type) {
+      if (player.position !== i) return;
+      if (!squares[i].type) {
         showPropertyModal(i, player);
+      } else if (squares[i].type === 'chance') {
+        showChanceModal(player);
       }
     });
     board.appendChild(square);
@@ -261,6 +266,23 @@ function rollDice(id) {
   showDiceRoll(roll);
 }
 
+function showChanceModal(player) {
+  if (!chanceCards.length) return;
+  currentChance = chanceCards[Math.floor(Math.random() * chanceCards.length)];
+  document.getElementById('chanceText').textContent = currentChance.text;
+  document.getElementById('chanceModal').classList.remove('hidden');
+  document.getElementById('closeChance').onclick = () => {
+    player.balance += currentChance.value;
+    savePlayers();
+    if (playerIdParam === 'bank') {
+      updateBankerList();
+    } else {
+      updatePlayerInfo(player.id);
+    }
+    document.getElementById('chanceModal').classList.add('hidden');
+  };
+}
+
 function showPropertyModal(index, player) {
   const modal = document.getElementById('propertyModal');
   const nameEl = document.getElementById('modalName');
@@ -308,6 +330,7 @@ createBoard();
 loadPlayers();
 renderBoard();
 document.getElementById('closeModal').addEventListener('click', hideModal);
+fetch('sorteReves.json').then(r=>r.json()).then(data=>chanceCards=data);
 
 const sidebar = document.getElementById('sidebar');
 if (playerIdParam === 'bank') {
