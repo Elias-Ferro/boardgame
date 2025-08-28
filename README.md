@@ -17,4 +17,5 @@ Abra `index.html` no navegador.
 - As casas do tabuleiro exibem o nome, preço e uma faixa colorida conforme o Banco Imobiliário.
 - Cada casa do tabuleiro pode ser clicada pelo jogador que está nela para exibir um modal com informações e opção de compra.
 - Se um jogador cair na casa "Vá para a Prisão", ele é automaticamente movido para a "Prisão".
+- Ao cair na prisão, um modal avisa "Você está preso! Ao sair pague fiança" e, na próxima movimentação, são debitados 50 do saldo como fiança.
 - Ao cair em "Sorte ou Revés", o jogador pode clicar uma única vez na casa para receber um card aleatório (ganhando ou perdendo de 10 a 80). Ele só poderá sortear novamente ao se mover para outra casa de "Sorte ou Revés".

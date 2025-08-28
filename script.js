@@ -49,10 +49,13 @@ const squares = [
   { name: 'Jardim Leblon', price: 450, color: '#0000FF' }
 ];
 
+const jailIndex = squares.findIndex((s) => s.type === 'jail');
+
 function loadPlayers() {
   players = JSON.parse(localStorage.getItem('players') || '[]');
   players.forEach((p) => {
     if (p.chanceUsed === undefined) p.chanceUsed = false;
+    if (p.inJail === undefined) p.inJail = false;
   });
 }
 
@@ -89,6 +92,17 @@ function createBoard() {
       price.textContent = '$' + squares[i].price;
       square.appendChild(price);
     }
+    if (squares[i].type === 'jail') {
+      const icon = document.createElement('span');
+      icon.className = 'icon jail-icon';
+      icon.textContent = '👮';
+      square.appendChild(icon);
+    } else if (squares[i].type === 'gotojail') {
+      const icon = document.createElement('span');
+      icon.className = 'icon gotojail-icon';
+      icon.textContent = '↙';
+      square.appendChild(icon);
+    }
     square.addEventListener('click', () => {
       if (!playerIdParam || playerIdParam === 'bank') return;
       const player = players.find((p) => p.id === playerIdParam);
@@ -109,9 +123,11 @@ function renderBoard() {
     const square = document.getElementById('sq' + i);
     const label = square.querySelector('.name');
     const price = square.querySelector('.price');
+    const icon = square.querySelector('.icon');
     square.innerHTML = '';
     square.appendChild(label);
     if (price) square.appendChild(price);
+    if (icon) square.appendChild(icon);
   }
   players.forEach((p) => {
     const token = document.createElement('div');
@@ -129,9 +145,14 @@ function renderBoard() {
 function movePlayer(id, steps) {
   const player = players.find((p) => p.id === id);
   if (!player) return;
+  if (player.inJail) {
+    player.balance -= 50;
+    player.inJail = false;
+  }
   let newPos = (player.position + steps) % 40;
-  if (squares[newPos].type === 'gotojail') {
-    newPos = squares.findIndex((s) => s.type === 'jail');
+  if (squares[newPos].type === 'gotojail' || newPos === jailIndex) {
+    newPos = jailIndex;
+    player.inJail = true;
   }
   player.position = newPos;
   player.chanceUsed = false;
@@ -141,6 +162,9 @@ function movePlayer(id, steps) {
     updateBankerList();
   } else if (playerIdParam) {
     updatePlayerInfo(playerIdParam);
+  }
+  if (player.inJail) {
+    showJailModal();
   }
 }
 
@@ -164,6 +188,7 @@ function setupBankerControls() {
       balance: 1500,
       properties: [],
       chanceUsed: false,
+      inJail: false,
     });
     savePlayers();
     renderBoard();
@@ -287,6 +312,15 @@ function rollDice(id) {
   showDiceRoll(roll).then(() => {
     movePlayer(id, roll);
   });
+}
+
+function showJailModal() {
+  const modal = document.getElementById('jailModal');
+  if (!modal) return;
+  modal.classList.remove('hidden');
+  document.getElementById('closeJail').onclick = () => {
+    modal.classList.add('hidden');
+  };
 }
 
 function showChanceModal(player) {
