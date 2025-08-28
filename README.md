@@ -1,21 +1,14 @@
-# boardgame
+## Banco Imobiliário Online
 
-Minha versão online do Banco Imobiliário.
+Uma adaptação simples do clássico jogo de compra e venda de propriedades, feita apenas com HTML, CSS e JavaScript.
 
-## Como usar
+## Conceito
 
-Abra `index.html` no navegador.
+Os participantes percorrem o tabuleiro adquirindo propriedades e cobrando aluguel. O banqueiro administra o dinheiro e garante que as regras sejam seguidas.
 
-- O banqueiro acessa `index.html?player=bank` para adicionar até seis jogadores e mover qualquer um deles.
-- Cada participante recebe um link gerado pelo banqueiro no formato `index.html?player=ID`.
-- O estado do jogo é salvo em *localStorage*. Abrir a página em outra aba do mesmo navegador mostra as informações atuais.
-- O tabuleiro ocupa a área principal e os controles ficam em uma barra lateral à esquerda.
-- O layout é responsivo, mantendo o jogo visível sem rolagem.
-- O banqueiro vê a lista completa de jogadores, saldo e propriedades, podendo mover ou remover qualquer um na barra lateral.
-- Cada jogador usa a mesma barra lateral para rolar dados, ver saldo e cartas das propriedades adquiridas.
-- O movimento só acontece depois que a animação do dado termina, e o resultado fica visível para todos.
-- As casas do tabuleiro exibem o nome, preço e uma faixa colorida conforme o Banco Imobiliário.
-- Cada casa do tabuleiro pode ser clicada pelo jogador que está nela para exibir um modal com informações e opção de compra.
-- Se um jogador cair na casa "Vá para a Prisão", ele é automaticamente movido para a "Prisão".
-- Ao cair na prisão, um modal avisa "Você está preso! Ao sair pague fiança" e, na próxima movimentação, são debitados 50 do saldo como fiança.
-- Ao cair em "Sorte ou Revés", o jogador pode clicar uma única vez na casa para receber um card aleatório (ganhando ou perdendo de 10 a 80). Ele só poderá sortear novamente ao se mover para outra casa de "Sorte ou Revés".
+## Como jogar
+
+1. Abra `index.html` no navegador.
+2. O banqueiro acessa `index.html?player=bank` e compartilha os links gerados (`index.html?player=ID`) com até seis participantes.
+3. Cada jogador rola os dados, move seu pino e pode comprar a propriedade em que cair, quando disponível.
+4. O estado da partida é salvo no *localStorage*, permitindo retomar o jogo no mesmo navegador.
