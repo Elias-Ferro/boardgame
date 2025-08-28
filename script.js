@@ -50,6 +50,7 @@ const squares = [
 ];
 
 const jailIndex = squares.findIndex((s) => s.type === 'jail');
+const vacationIndex = squares.findIndex((s) => s.type === 'vacation');
 
 function loadPlayers() {
   players = JSON.parse(localStorage.getItem('players') || '[]');
@@ -149,10 +150,22 @@ function movePlayer(id, steps) {
     player.balance -= 50;
     player.inJail = false;
   }
-  let newPos = (player.position + steps) % 40;
+  const oldPos = player.position;
+  let newPos = (oldPos + steps) % 40;
+  const laps = Math.floor((oldPos + steps) / 40);
+  if (laps > 0) player.balance += laps * 100;
   if (squares[newPos].type === 'gotojail' || newPos === jailIndex) {
     newPos = jailIndex;
     player.inJail = true;
+  } else if (newPos === vacationIndex) {
+    const occupied = players.some(
+      (p) => p.id !== player.id && p.position === newPos
+    );
+    if (occupied) {
+      newPos = (newPos - 1 + 40) % 40;
+    } else {
+      player.balance += 100;
+    }
   }
   player.position = newPos;
   player.chanceUsed = false;

@@ -11,4 +11,6 @@ Os participantes percorrem o tabuleiro adquirindo propriedades e cobrando alugue
 1. Abra `index.html` no navegador.
 2. O banqueiro acessa `index.html?player=bank` e compartilha os links gerados (`index.html?player=ID`) com até seis participantes.
 3. Cada jogador rola os dados, move seu pino e pode comprar a propriedade em que cair, quando disponível.
-4. O estado da partida é salvo no *localStorage*, permitindo retomar o jogo no mesmo navegador.
+4. Ao passar ou cair na casa **Partida**, o jogador recebe 100 de bônus.
+5. A casa **Férias** também concede 100 ao participante que chegar nela, mas apenas um jogador pode ocupá-la por vez.
+6. O estado da partida é salvo no *localStorage*, permitindo retomar o jogo no mesmo navegador.
