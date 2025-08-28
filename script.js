@@ -121,7 +121,11 @@ function renderBoard() {
 function movePlayer(id, steps) {
   const player = players.find((p) => p.id === id);
   if (!player) return;
-  player.position = (player.position + steps) % 40;
+  let newPos = (player.position + steps) % 40;
+  if (squares[newPos].type === 'gotojail') {
+    newPos = squares.findIndex((s) => s.type === 'jail');
+  }
+  player.position = newPos;
   savePlayers();
   renderBoard();
   if (playerIdParam === 'bank') {

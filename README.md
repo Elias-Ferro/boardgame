@@ -15,3 +15,4 @@ Abra `index.html` no navegador.
 - Cada jogador usa a mesma barra lateral para rolar dados, ver saldo e cartas das propriedades adquiridas.
 - As casas do tabuleiro exibem o nome, preço e uma faixa colorida conforme o Banco Imobiliário.
 - Cada casa do tabuleiro pode ser clicada pelo jogador que está nela para exibir um modal com informações e opção de compra.
+- Se um jogador cair na casa "Vá para a Prisão", ele é automaticamente movido para a "Prisão".
