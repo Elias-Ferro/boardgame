@@ -49,6 +49,10 @@ const squares = [
   { name: 'Jardim Leblon', price: 450, color: '#0000FF' }
 ];
 
+squares.forEach((s) => {
+  if (s.price) s.rent = Math.floor(s.price * 0.1);
+});
+
 const jailIndex = squares.findIndex((s) => s.type === 'jail');
 const vacationIndex = squares.findIndex((s) => s.type === 'vacation');
 
@@ -242,10 +246,17 @@ function updateBankerList() {
 
     const body = document.createElement('div');
     const link = `${location.pathname}?player=${p.id}`;
+    const props =
+      p.properties
+        .map((name) => {
+          const sq = squares.find((s) => s.name === name);
+          return `${name} (Aluguel: ${sq?.rent ?? 0})`;
+        })
+        .join(', ') || 'Nenhuma';
     body.innerHTML =
       `Pos: ${p.position}<br>` +
       `Saldo: <span id="bal-${p.id}">${p.balance}</span><br>` +
-      `Propriedades: ${p.properties.join(', ') || 'Nenhuma'}<br>` +
+      `Propriedades: ${props}<br>` +
       `<a href="${link}">link</a><br>` +
       `<input type="number" id="step-${p.id}" min="1" placeholder="passos">` +
       `<button data-move="${p.id}">Mover</button><br>` +
@@ -339,7 +350,9 @@ function updatePlayerInfo(id) {
     player.properties.forEach((name) => {
       const card = document.createElement('div');
       card.className = 'property-card';
-      card.textContent = name;
+      const sq = squares.find((s) => s.name === name);
+      const rentText = sq && sq.rent ? ` - Aluguel: ${sq.rent}` : '';
+      card.textContent = name + rentText;
       props.appendChild(card);
     });
   }
@@ -445,19 +458,20 @@ function showPropertyModal(index, player) {
   const rentSection = document.getElementById('rentSection');
   const rentOwner = document.getElementById('rentOwner');
   const payRentBtn = document.getElementById('payRentBtn');
+  const rentValue = document.getElementById('rentValue');
   const square = squares[index];
   const price = square.price || 0;
   nameEl.textContent = square.name;
-  infoEl.textContent = `Preço: ${price}`;
+  infoEl.textContent = `Preço: ${price} - Aluguel: ${square.rent}`;
   const owned = player.properties.includes(square.name);
   const owner = players.find((p) => p.properties.includes(square.name));
   if (owner && owner.id !== player.id) {
     buyBtn.style.display = 'none';
     rentSection.classList.remove('hidden');
     rentOwner.textContent = `Proprietário: ${owner.name}`;
+    rentValue.textContent = `Aluguel: ${square.rent}`;
     payRentBtn.onclick = () => {
-      const amount = parseInt(document.getElementById('rentAmount').value, 10) || 0;
-      transferFunds(player.id, owner.id, amount);
+      transferFunds(player.id, owner.id, square.rent);
       hideModal();
     };
   } else {
