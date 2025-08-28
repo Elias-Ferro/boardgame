@@ -298,7 +298,19 @@ function setupPlayerControls(id) {
     rollDice(id);
   });
 
+  const transferDiv = document.createElement('div');
+  transferDiv.id = 'transferDiv';
+  transferDiv.innerHTML =
+    '<select id="transferTarget"></select> <input type="number" id="transferAmount" placeholder="valor"> <button id="transferBtn">Enviar</button>';
+  controls.insertBefore(transferDiv, document.getElementById('dice'));
+  document.getElementById('transferBtn').onclick = () => {
+    const toId = document.getElementById('transferTarget').value;
+    const amount = parseInt(document.getElementById('transferAmount').value, 10) || 0;
+    transferFunds(id, toId, amount);
+  };
+
   updatePlayerInfo(id);
+  updateTransferOptions();
 }
 
 function updatePlayerInfo(id) {
@@ -316,6 +328,35 @@ function updatePlayerInfo(id) {
       props.appendChild(card);
     });
   }
+}
+
+function updateTransferOptions() {
+  const select = document.getElementById('transferTarget');
+  if (!select) return;
+  select.innerHTML = '';
+  players.forEach((p) => {
+    if (p.id !== playerIdParam) {
+      const opt = document.createElement('option');
+      opt.value = p.id;
+      opt.textContent = p.name;
+      select.appendChild(opt);
+    }
+  });
+}
+
+function transferFunds(fromId, toId, amount) {
+  const from = players.find((p) => p.id === fromId);
+  const to = players.find((p) => p.id === toId);
+  if (!from || !to || amount <= 0 || from.balance < amount) return;
+  from.balance -= amount;
+  to.balance += amount;
+  savePlayers();
+  renderBoard();
+  if (playerIdParam === 'bank') {
+    updateBankerList();
+  }
+  if (playerIdParam === fromId) updatePlayerInfo(fromId);
+  if (playerIdParam === toId) updatePlayerInfo(toId);
 }
 
 function showDiceRoll(result) {
@@ -386,21 +427,37 @@ function showPropertyModal(index, player) {
   const nameEl = document.getElementById('modalName');
   const infoEl = document.getElementById('modalInfo');
   const buyBtn = document.getElementById('buyBtn');
+  const rentSection = document.getElementById('rentSection');
+  const rentOwner = document.getElementById('rentOwner');
+  const payRentBtn = document.getElementById('payRentBtn');
   const square = squares[index];
   const price = square.price || 0;
   nameEl.textContent = square.name;
   infoEl.textContent = `Preço: ${price}`;
   const owned = player.properties.includes(square.name);
-  buyBtn.style.display = owned ? 'none' : 'block';
-  buyBtn.onclick = () => {
-    if (player.balance >= price) {
-      player.balance -= price;
-      player.properties.push(square.name);
-      savePlayers();
-      updatePlayerInfo(player.id);
-    }
-    hideModal();
-  };
+  const owner = players.find((p) => p.properties.includes(square.name));
+  if (owner && owner.id !== player.id) {
+    buyBtn.style.display = 'none';
+    rentSection.classList.remove('hidden');
+    rentOwner.textContent = `Proprietário: ${owner.name}`;
+    payRentBtn.onclick = () => {
+      const amount = parseInt(document.getElementById('rentAmount').value, 10) || 0;
+      transferFunds(player.id, owner.id, amount);
+      hideModal();
+    };
+  } else {
+    rentSection.classList.add('hidden');
+    buyBtn.style.display = owned ? 'none' : 'block';
+    buyBtn.onclick = () => {
+      if (player.balance >= price) {
+        player.balance -= price;
+        player.properties.push(square.name);
+        savePlayers();
+        updatePlayerInfo(player.id);
+      }
+      hideModal();
+    };
+  }
   modal.classList.remove('hidden');
 }
 
@@ -416,6 +473,7 @@ window.addEventListener('storage', (e) => {
       updateBankerList();
     } else if (playerIdParam) {
       updatePlayerInfo(playerIdParam);
+      updateTransferOptions();
     }
   }
   if (e.key === 'lastRoll' && e.newValue) {

@@ -129,3 +129,12 @@ html, body {
 .hidden {
   display: none;
 }
+
+#rentSection {
+  margin-top: 1vmin;
+}
+
+#rentSection input {
+  width: 6vmin;
+  margin-right: 0.5vmin;
+}
