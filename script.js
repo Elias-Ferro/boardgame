@@ -50,7 +50,16 @@ const squares = [
 ];
 
 squares.forEach((s) => {
-  if (s.price) s.rent = Math.floor(s.price * 0.1);
+  if (s.price) {
+    s.rents = [
+      Math.floor(s.price * 0.1),
+      Math.floor(s.price * 0.2),
+      Math.floor(s.price * 0.3),
+    ];
+    s.houses = 0;
+    s.rent = s.rents[0];
+    s.owner = null;
+  }
 });
 
 const jailIndex = squares.findIndex((s) => s.type === 'jail');
@@ -58,9 +67,28 @@ const vacationIndex = squares.findIndex((s) => s.type === 'vacation');
 
 function loadPlayers() {
   players = JSON.parse(localStorage.getItem('players') || '[]');
+  squares.forEach((s) => {
+    if (s.price) {
+      s.owner = null;
+      s.houses = 0;
+      s.rent = s.rents[0];
+    }
+  });
   players.forEach((p) => {
     if (p.chanceUsed === undefined) p.chanceUsed = false;
     if (p.inJail === undefined) p.inJail = false;
+    if (!p.properties) p.properties = [];
+    p.properties = p.properties.map((pr) =>
+      typeof pr === 'string' ? { name: pr, houses: 1 } : pr
+    );
+    p.properties.forEach((pr) => {
+      const sq = squares.find((s) => s.name === pr.name);
+      if (sq) {
+        sq.owner = p.id;
+        sq.houses = pr.houses;
+        sq.rent = sq.rents[pr.houses - 1];
+      }
+    });
   });
   ensureUniqueColors();
   savePlayers();
@@ -146,6 +174,17 @@ function renderBoard() {
     square.appendChild(label);
     if (price) square.appendChild(price);
     if (icon) square.appendChild(icon);
+    if (squares[i].houses) {
+      const housesDiv = document.createElement('div');
+      housesDiv.className = 'houses';
+      for (let h = 0; h < squares[i].houses; h++) {
+        const hIcon = document.createElement('span');
+        hIcon.className = 'house-icon';
+        hIcon.textContent = '🏠';
+        housesDiv.appendChild(hIcon);
+      }
+      square.appendChild(housesDiv);
+    }
   }
   players.forEach((p) => {
     const token = document.createElement('div');
@@ -248,9 +287,10 @@ function updateBankerList() {
     const link = `${location.pathname}?player=${p.id}`;
     const props =
       p.properties
-        .map((name) => {
-          const sq = squares.find((s) => s.name === name);
-          return `${name} (Aluguel: ${sq?.rent ?? 0})`;
+        .map((pr) => {
+          const sq = squares.find((s) => s.name === pr.name);
+          const rent = sq ? sq.rents[pr.houses - 1] : 0;
+          return `${pr.name} (${pr.houses} casas - Aluguel: ${rent})`;
         })
         .join(', ') || 'Nenhuma';
     body.innerHTML =
@@ -299,6 +339,17 @@ function updateBankerList() {
   list.querySelectorAll('button[data-remove]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const id = btn.getAttribute('data-remove');
+      const player = players.find((pl) => pl.id === id);
+      if (player) {
+        player.properties.forEach((pr) => {
+          const sq = squares.find((s) => s.name === pr.name);
+          if (sq) {
+            sq.owner = null;
+            sq.houses = 0;
+            sq.rent = sq.rents[0];
+          }
+        });
+      }
       players = players.filter((pl) => pl.id !== id);
       savePlayers();
       renderBoard();
@@ -347,12 +398,15 @@ function updatePlayerInfo(id) {
   const props = document.getElementById('playerProperties');
   if (props) {
     props.innerHTML = '';
-    player.properties.forEach((name) => {
+    player.properties.forEach((pr) => {
       const card = document.createElement('div');
       card.className = 'property-card';
-      const sq = squares.find((s) => s.name === name);
-      const rentText = sq && sq.rent ? ` - Aluguel: ${sq.rent}` : '';
-      card.textContent = name + rentText;
+      const sq = squares.find((s) => s.name === pr.name);
+      const rent = sq ? sq.rents[pr.houses - 1] : 0;
+      card.innerHTML =
+        `<div class="prop-title">${pr.name}</div>` +
+        `<div class="prop-houses">${'🏠'.repeat(pr.houses)}</div>` +
+        `<div class="prop-rent">Aluguel: ${rent}</div>`;
       props.appendChild(card);
     });
   }
@@ -455,16 +509,22 @@ function showPropertyModal(index, player) {
   const nameEl = document.getElementById('modalName');
   const infoEl = document.getElementById('modalInfo');
   const buyBtn = document.getElementById('buyBtn');
+  const addHouseBtn = document.getElementById('addHouseBtn');
   const rentSection = document.getElementById('rentSection');
   const rentOwner = document.getElementById('rentOwner');
   const payRentBtn = document.getElementById('payRentBtn');
   const rentValue = document.getElementById('rentValue');
+  const houseIcons = document.getElementById('houseIcons');
   const square = squares[index];
   const price = square.price || 0;
   nameEl.textContent = square.name;
+  houseIcons.textContent = '🏠'.repeat(square.houses);
   infoEl.textContent = `Preço: ${price} - Aluguel: ${square.rent}`;
-  const owned = player.properties.includes(square.name);
-  const owner = players.find((p) => p.properties.includes(square.name));
+  const propObj = player.properties.find((pr) => pr.name === square.name);
+  const owner = players.find((p) =>
+    p.properties.some((pr) => pr.name === square.name)
+  );
+  addHouseBtn.style.display = 'none';
   if (owner && owner.id !== player.id) {
     buyBtn.style.display = 'none';
     rentSection.classList.remove('hidden');
@@ -474,15 +534,40 @@ function showPropertyModal(index, player) {
       transferFunds(player.id, owner.id, square.rent);
       hideModal();
     };
+  } else if (propObj) {
+    buyBtn.style.display = 'none';
+    rentSection.classList.add('hidden');
+    if (square.houses < 3) {
+      const housePrice = Math.floor(price / 2);
+      addHouseBtn.style.display = 'block';
+      addHouseBtn.textContent = `Adicionar residência (${housePrice})`;
+      addHouseBtn.onclick = () => {
+        if (player.balance >= housePrice) {
+          player.balance -= housePrice;
+          square.houses++;
+          square.rent = square.rents[square.houses - 1];
+          propObj.houses = square.houses;
+          infoEl.textContent = `Preço: ${price} - Aluguel: ${square.rent}`;
+          houseIcons.textContent = '🏠'.repeat(square.houses);
+          savePlayers();
+          updatePlayerInfo(player.id);
+          renderBoard();
+        }
+      };
+    }
   } else {
     rentSection.classList.add('hidden');
-    buyBtn.style.display = owned ? 'none' : 'block';
+    buyBtn.style.display = 'block';
     buyBtn.onclick = () => {
       if (player.balance >= price) {
         player.balance -= price;
-        player.properties.push(square.name);
+        player.properties.push({ name: square.name, houses: 1 });
+        square.owner = player.id;
+        square.houses = 1;
+        square.rent = square.rents[0];
         savePlayers();
         updatePlayerInfo(player.id);
+        renderBoard();
       }
       hideModal();
     };

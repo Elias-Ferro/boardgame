@@ -49,6 +49,14 @@ html, body {
   font-size: 0.8vmin;
 }
 
+.houses {
+  display: flex;
+}
+
+.house-icon {
+  font-size: 1vmin;
+}
+
 .icon {
   font-size: 1.5vmin;
 }
@@ -103,6 +111,10 @@ html, body {
   padding: 0.5vmin;
   margin: 0.5vmin 0;
   background: #fff;
+  font-size: 1vmin;
+}
+
+.property-card .prop-houses {
   font-size: 1vmin;
 }
 

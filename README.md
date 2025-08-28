@@ -15,6 +15,7 @@ Os participantes percorrem o tabuleiro adquirindo propriedades e cobrando alugue
 5. Ao passar ou cair na casa **Partida**, o jogador recebe 100 de bônus.
 6. A casa **Férias** também concede 100 ao participante que chegar nela, mas apenas um jogador pode ocupá-la por vez.
 7. Se cair em uma propriedade já comprada, o dono pode cobrar o aluguel indicado no card e o jogador paga usando "Pagar aluguel".
-8. O banqueiro visualiza todos os participantes em uma lista expansível e pode ajustar seus saldos.
-9. O dado é de seis lados e aparece no rodapé da barra lateral sem deslocar os controles.
-10. O estado da partida é salvo no *localStorage*, permitindo retomar o jogo no mesmo navegador.
+8. Propriedades comportam até três residências. Cada nova residência aumenta o aluguel e é comprada quando o dono cai em sua própria casa.
+9. O banqueiro visualiza todos os participantes em uma lista expansível e pode ajustar seus saldos.
+10. O dado é de seis lados e aparece no rodapé da barra lateral sem deslocar os controles.
+11. O estado da partida é salvo no *localStorage*, permitindo retomar o jogo no mesmo navegador.
