@@ -186,7 +186,7 @@ function setupBankerControls() {
   const addForm = document.createElement('div');
   addForm.innerHTML =
     '<input id="newPlayerName" placeholder="Nome"> <button id="addPlayer">Adicionar</button>';
-  controls.appendChild(addForm);
+  controls.insertBefore(addForm, document.getElementById('dice'));
 
   document.getElementById('addPlayer').onclick = () => {
     const name = document.getElementById('newPlayerName').value.trim();
@@ -210,7 +210,7 @@ function setupBankerControls() {
 
   const list = document.createElement('div');
   list.id = 'bankerList';
-  controls.appendChild(list);
+  controls.insertBefore(list, document.getElementById('dice'));
 
   updateBankerList();
 }
@@ -219,29 +219,61 @@ function updateBankerList() {
   const list = document.getElementById('bankerList');
   list.innerHTML = '';
   players.forEach((p) => {
-    const row = document.createElement('div');
-    row.className = 'playerRow';
+    const details = document.createElement('details');
+    const summary = document.createElement('summary');
+    summary.style.color = p.color;
+    summary.textContent = p.name;
+    details.appendChild(summary);
+
+    const body = document.createElement('div');
     const link = `${location.pathname}?player=${p.id}`;
-    row.innerHTML =
-      `<span style="color:${p.color}">${p.name}</span> (pos ${p.position})<br>` +
-      `Saldo: ${p.balance} - Props: ${p.properties.length}<br>` +
-      `<a href="${link}">link</a> ` +
+    body.innerHTML =
+      `Pos: ${p.position}<br>` +
+      `Saldo: <span id="bal-${p.id}">${p.balance}</span><br>` +
+      `Propriedades: ${p.properties.join(', ') || 'Nenhuma'}<br>` +
+      `<a href="${link}">link</a><br>` +
       `<input type="number" id="step-${p.id}" min="1" placeholder="passos">` +
-      `<button data-id="${p.id}">Mover</button> ` +
-      `<button data-remove="${p.id}">Remover</button>`;
-    list.appendChild(row);
+      `<button data-move="${p.id}">Mover</button><br>` +
+      `<input type="number" id="cash-${p.id}" placeholder="valor">` +
+      `<button data-add="${p.id}">Adicionar</button>` +
+      `<button data-sub="${p.id}">Remover</button> ` +
+      `<button data-remove="${p.id}">Excluir</button>`;
+    details.appendChild(body);
+    list.appendChild(details);
   });
-  list.querySelectorAll('button[data-id]').forEach((btn) => {
+  list.querySelectorAll('button[data-move]').forEach((btn) => {
     btn.addEventListener('click', () => {
-      const id = btn.getAttribute('data-id');
+      const id = btn.getAttribute('data-move');
       const steps = parseInt(document.getElementById('step-' + id).value, 10) || 0;
       movePlayer(id, steps);
+    });
+  });
+  list.querySelectorAll('button[data-add]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-add');
+      const amount = parseInt(document.getElementById('cash-' + id).value, 10) || 0;
+      const player = players.find((pl) => pl.id === id);
+      player.balance += amount;
+      savePlayers();
+      renderBoard();
+      updateBankerList();
+    });
+  });
+  list.querySelectorAll('button[data-sub]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.getAttribute('data-sub');
+      const amount = parseInt(document.getElementById('cash-' + id).value, 10) || 0;
+      const player = players.find((pl) => pl.id === id);
+      player.balance -= amount;
+      savePlayers();
+      renderBoard();
+      updateBankerList();
     });
   });
   list.querySelectorAll('button[data-remove]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const id = btn.getAttribute('data-remove');
-      players = players.filter((p) => p.id !== id);
+      players = players.filter((pl) => pl.id !== id);
       savePlayers();
       renderBoard();
       updateBankerList();
@@ -253,20 +285,15 @@ function setupPlayerControls(id) {
   const controls = document.getElementById('sidebar');
   const info = document.createElement('div');
   info.id = 'playerInfo';
-  controls.appendChild(info);
+  controls.insertBefore(info, document.getElementById('dice'));
 
   const props = document.createElement('div');
   props.id = 'playerProperties';
-  controls.appendChild(props);
-
-  const dice = document.createElement('div');
-  dice.id = 'dice';
-  dice.className = 'dice';
-  controls.appendChild(dice);
+  controls.insertBefore(props, document.getElementById('dice'));
 
   const btn = document.createElement('button');
   btn.textContent = 'Rolar dados';
-  controls.appendChild(btn);
+  controls.insertBefore(btn, document.getElementById('dice'));
   btn.addEventListener('click', () => {
     rollDice(id);
   });
@@ -316,8 +343,7 @@ function showDiceRoll(result) {
 }
 
 function rollDice(id) {
-  const roll =
-    Math.floor(Math.random() * 6) + 1 + Math.floor(Math.random() * 6) + 1;
+  const roll = Math.floor(Math.random() * 6) + 1;
   localStorage.setItem(
     'lastRoll',
     JSON.stringify({ result: roll, time: Date.now() })

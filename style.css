@@ -78,6 +78,7 @@ html, body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: relative;
 }
 
 .playerRow {
@@ -91,8 +92,10 @@ html, body {
   padding: 1vmin 2vmin;
   font-size: 4vmin;
   display: none;
-  margin-top: 1vmin;
-  align-self: center;
+  position: absolute;
+  bottom: 1vmin;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
 .property-card {

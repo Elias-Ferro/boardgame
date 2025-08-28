@@ -13,4 +13,6 @@ Os participantes percorrem o tabuleiro adquirindo propriedades e cobrando alugue
 3. Cada jogador rola os dados, move seu pino e pode comprar a propriedade em que cair, quando disponível.
 4. Ao passar ou cair na casa **Partida**, o jogador recebe 100 de bônus.
 5. A casa **Férias** também concede 100 ao participante que chegar nela, mas apenas um jogador pode ocupá-la por vez.
-6. O estado da partida é salvo no *localStorage*, permitindo retomar o jogo no mesmo navegador.
+6. O banqueiro visualiza todos os participantes em uma lista expansível e pode ajustar seus saldos.
+7. O dado é de seis lados e aparece no rodapé da barra lateral sem deslocar os controles.
+8. O estado da partida é salvo no *localStorage*, permitindo retomar o jogo no mesmo navegador.
