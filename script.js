@@ -58,6 +58,19 @@ function loadPlayers() {
     if (p.chanceUsed === undefined) p.chanceUsed = false;
     if (p.inJail === undefined) p.inJail = false;
   });
+  ensureUniqueColors();
+  savePlayers();
+}
+
+function ensureUniqueColors() {
+  const used = new Set();
+  players.forEach((p) => {
+    if (used.has(p.color)) {
+      const available = colors.find((c) => !used.has(c));
+      if (available) p.color = available;
+    }
+    used.add(p.color);
+  });
 }
 
 function savePlayers() {
@@ -192,7 +205,9 @@ function setupBankerControls() {
     const name = document.getElementById('newPlayerName').value.trim();
     if (!name || players.length >= 6) return;
     const id = Date.now().toString();
-    const color = colors[players.length % colors.length];
+    const used = new Set(players.map((p) => p.color));
+    const color = colors.find((c) => !used.has(c));
+    if (!color) return;
     players.push({
       id,
       name,
