@@ -1,0 +1,152 @@
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #e9ecef;
+}
+
+.game {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+.board {
+  flex: 1;
+  max-height: 90vmin;
+  aspect-ratio: 1 / 1;
+  display: grid;
+  grid-template-columns: repeat(11, 1fr);
+  grid-template-rows: repeat(11, 1fr);
+  gap: 0.2vmin;
+  background: #fff;
+  border: 0.3vmin solid #ccc;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.square {
+  background: #fafafa;
+  border: 0.1vmin solid #ddd;
+  position: relative;
+  font-size: 1vmin;
+  padding: 0.2vmin;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  text-align: center;
+}
+
+.square .name {
+  font-weight: bold;
+  font-size: 0.9vmin;
+}
+
+.square .price {
+  font-size: 0.8vmin;
+}
+
+.houses {
+  display: flex;
+}
+
+.house-icon {
+  font-size: 1vmin;
+}
+
+.icon {
+  font-size: 1.5vmin;
+}
+
+.jail-icon,
+.gotojail-icon {
+  font-size: 2vmin;
+}
+
+.token {
+  position: absolute;
+  padding: 0.2vmin 0.4vmin;
+  border-radius: 0.3vmin;
+  color: #fff;
+  font-size: 0.9vmin;
+  white-space: nowrap;
+}
+
+.sidebar {
+  width: 20vw;
+  height: 90vmin;
+  background: #fff;
+  border-radius: 0.8vmin;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  padding: 1vmin;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.playerRow {
+  margin: 0.5vmin 0;
+  font-size: 1vmin;
+}
+
+.dice {
+  background: #fff;
+  border: 0.2vmin solid #000;
+  padding: 1vmin 2vmin;
+  font-size: 4vmin;
+  display: none;
+  position: absolute;
+  bottom: 1vmin;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.property-card {
+  border: 0.2vmin solid #000;
+  padding: 0.5vmin;
+  margin: 0.5vmin 0;
+  background: #fff;
+  font-size: 1vmin;
+}
+
+.property-card .prop-houses {
+  font-size: 1vmin;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 2vmin;
+  border-radius: 0.5vmin;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.hidden {
+  display: none;
+}
+
+#rentSection {
+  margin-top: 1vmin;
+}
+
+#rentSection input {
+  width: 6vmin;
+  margin-right: 0.5vmin;
+}

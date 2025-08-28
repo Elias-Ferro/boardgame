@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Banco Imobiliário Online</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="game">
+    <aside id="sidebar" class="sidebar">
+      <div id="dice" class="dice"></div>
+    </aside>
+    <div id="board" class="board"></div>
+  </div>
+    <div id="propertyModal" class="modal hidden">
+      <div class="modal-content">
+        <h3 id="modalName"></h3>
+        <div id="modalInfo"></div>
+        <div id="houseIcons"></div>
+        <div id="rentSection" class="hidden">
+          <div id="rentOwner"></div>
+          <div id="rentValue"></div>
+          <button id="payRentBtn">Pagar aluguel</button>
+        </div>
+        <button id="buyBtn">Comprar</button>
+        <button id="addHouseBtn">Adicionar residência</button>
+        <button id="closeModal">Fechar</button>
+      </div>
+    </div>
+    <div id="chanceModal" class="modal hidden">
+      <div class="modal-content">
+        <h3>Sorte ou Revés</h3>
+        <p id="chanceText"></p>
+        <button id="closeChance">Fechar</button>
+      </div>
+    </div>
+    <div id="jailModal" class="modal hidden">
+      <div class="modal-content">
+        <h3>Você está preso!</h3>
+        <p>Ao sair pague fiança</p>
+        <button id="closeJail">Fechar</button>
+      </div>
+    </div>
+  <script src="script.js"></script>
+</body>
+</html>
