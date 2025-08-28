@@ -75,6 +75,14 @@ function createBoard() {
     label.className = 'name';
     label.textContent = squares[i].name;
     square.appendChild(label);
+    square.addEventListener('click', () => {
+      if (!playerIdParam || playerIdParam === 'bank') return;
+      const player = players.find((p) => p.id === playerIdParam);
+      if (!player) return;
+      if (player.position === i && !squares[i].type) {
+        showPropertyModal(i, player);
+      }
+    });
     board.appendChild(square);
   }
 }
@@ -113,7 +121,7 @@ function movePlayer(id, steps) {
 }
 
 function setupBankerControls() {
-  const controls = document.getElementById('controls');
+  const controls = document.getElementById('bankerSidebar');
   const addForm = document.createElement('div');
   addForm.innerHTML =
     '<input id="newPlayerName" placeholder="Nome"> <button id="addPlayer">Adicionar</button>';
@@ -172,11 +180,19 @@ function updateBankerList() {
 }
 
 function setupPlayerControls(id) {
-  const controls = document.getElementById('controls');
+  const controls = document.getElementById('playerSidebar');
   const info = document.createElement('div');
   info.id = 'playerInfo';
   controls.appendChild(info);
-  updatePlayerInfo(id);
+
+  const props = document.createElement('div');
+  props.id = 'playerProperties';
+  controls.appendChild(props);
+
+  const dice = document.createElement('div');
+  dice.id = 'dice';
+  dice.className = 'dice';
+  controls.appendChild(dice);
 
   const btn = document.createElement('button');
   btn.textContent = 'Rolar dados';
@@ -184,20 +200,30 @@ function setupPlayerControls(id) {
   btn.addEventListener('click', () => {
     rollDice(id);
   });
+
+  updatePlayerInfo(id);
 }
 
 function updatePlayerInfo(id) {
   const player = players.find((p) => p.id === id);
   const info = document.getElementById('playerInfo');
   if (!player || !info) return;
-  info.innerHTML =
-    `<div>Saldo: ${player.balance}</div><div>Propriedades: ${
-      player.properties.join(', ') || 'Nenhuma'
-    }</div>`;
+  info.innerHTML = `<div>Saldo: ${player.balance}</div>`;
+  const props = document.getElementById('playerProperties');
+  if (props) {
+    props.innerHTML = '';
+    player.properties.forEach((name) => {
+      const card = document.createElement('div');
+      card.className = 'property-card';
+      card.textContent = name;
+      props.appendChild(card);
+    });
+  }
 }
 
 function showDiceRoll(result) {
   const dice = document.getElementById('dice');
+  if (!dice) return;
   dice.style.display = 'block';
   let count = 0;
   const interval = setInterval(() => {
@@ -220,6 +246,33 @@ function rollDice(id) {
   showDiceRoll(roll);
 }
 
+function showPropertyModal(index, player) {
+  const modal = document.getElementById('propertyModal');
+  const nameEl = document.getElementById('modalName');
+  const infoEl = document.getElementById('modalInfo');
+  const buyBtn = document.getElementById('buyBtn');
+  const square = squares[index];
+  const price = square.price || 100 + index * 10;
+  nameEl.textContent = square.name;
+  infoEl.textContent = `Preço: ${price}`;
+  const owned = player.properties.includes(square.name);
+  buyBtn.style.display = owned ? 'none' : 'block';
+  buyBtn.onclick = () => {
+    if (player.balance >= price) {
+      player.balance -= price;
+      player.properties.push(square.name);
+      savePlayers();
+      updatePlayerInfo(player.id);
+    }
+    hideModal();
+  };
+  modal.classList.remove('hidden');
+}
+
+function hideModal() {
+  document.getElementById('propertyModal').classList.add('hidden');
+}
+
 window.addEventListener('storage', (e) => {
   if (e.key === 'players') {
     loadPlayers();
@@ -239,9 +292,15 @@ window.addEventListener('storage', (e) => {
 createBoard();
 loadPlayers();
 renderBoard();
+document.getElementById('closeModal').addEventListener('click', hideModal);
 
 if (playerIdParam === 'bank') {
+  document.getElementById('playerSidebar').style.display = 'none';
   setupBankerControls();
 } else if (playerIdParam) {
+  document.getElementById('bankerSidebar').style.display = 'none';
   setupPlayerControls(playerIdParam);
+} else {
+  document.getElementById('bankerSidebar').style.display = 'none';
+  document.getElementById('playerSidebar').style.display = 'none';
 }

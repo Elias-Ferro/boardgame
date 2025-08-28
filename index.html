@@ -6,12 +6,19 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <h1>Banco Imobiliário</h1>
   <div class="game">
+    <div id="playerSidebar" class="sidebar"></div>
     <div id="board" class="board"></div>
-    <div id="controls" class="sidebar"></div>
+    <div id="bankerSidebar" class="sidebar"></div>
   </div>
-  <div id="dice" class="dice"></div>
+  <div id="propertyModal" class="modal hidden">
+    <div class="modal-content">
+      <h3 id="modalName"></h3>
+      <div id="modalInfo"></div>
+      <button id="buyBtn">Comprar</button>
+      <button id="closeModal">Fechar</button>
+    </div>
+  </div>
   <script src="script.js"></script>
 </body>
 </html>
