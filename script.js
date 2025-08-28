@@ -6,45 +6,45 @@ let players = [];
 
 const squares = [
   { name: 'Partida', type: 'start' },
-  { name: 'Leblon' },
+  { name: 'Leblon', price: 60, color: '#8B4513' },
   { name: 'Sorte ou Revés', type: 'chance' },
-  { name: 'Av. Presidente Vargas' },
-  { name: 'Av. Nossa Senhora de Copacabana' },
+  { name: 'Av. Presidente Vargas', price: 60, color: '#8B4513' },
+  { name: 'Av. Nossa Senhora de Copacabana', price: 100, color: '#ADD8E6' },
   { name: 'Companhia Ferroviária', type: 'transport' },
-  { name: 'Av. Brigadeiro Faria Lima' },
+  { name: 'Av. Brigadeiro Faria Lima', price: 100, color: '#ADD8E6' },
   { name: 'Sorte ou Revés', type: 'chance' },
-  { name: 'Av. Rebouças' },
-  { name: 'Av. 9 de Julho' },
+  { name: 'Av. Rebouças', price: 120, color: '#ADD8E6' },
+  { name: 'Av. 9 de Julho', price: 140, color: '#FF69B4' },
   { name: 'Prisão', type: 'jail' },
-  { name: 'Av. Europa' },
+  { name: 'Av. Europa', price: 140, color: '#FF69B4' },
   { name: 'Companhia de Viação', type: 'transport' },
-  { name: 'Rua Augusta' },
-  { name: 'Av. Pacaembu' },
+  { name: 'Rua Augusta', price: 160, color: '#FF69B4' },
+  { name: 'Av. Pacaembu', price: 160, color: '#FF69B4' },
   { name: 'Companhia de Táxi Aéreo', type: 'transport' },
-  { name: 'Interlagos' },
+  { name: 'Interlagos', price: 180, color: '#FFA500' },
   { name: 'Sorte ou Revés', type: 'chance' },
-  { name: 'Morumbi' },
-  { name: 'Av. 23 de Maio' },
+  { name: 'Morumbi', price: 180, color: '#FFA500' },
+  { name: 'Av. 23 de Maio', price: 200, color: '#FFA500' },
   { name: 'Férias', type: 'vacation' },
-  { name: 'Av. Estados Unidos' },
+  { name: 'Av. Estados Unidos', price: 220, color: '#FF0000' },
   { name: 'Sorte ou Revés', type: 'chance' },
-  { name: 'Av. Washington Luiz' },
-  { name: 'Av. Brasil' },
+  { name: 'Av. Washington Luiz', price: 220, color: '#FF0000' },
+  { name: 'Av. Brasil', price: 240, color: '#FF0000' },
   { name: 'Companhia de Navegação', type: 'transport' },
-  { name: 'Jardim Europa' },
-  { name: 'Av. Paulista' },
+  { name: 'Jardim Europa', price: 260, color: '#FFFF00' },
+  { name: 'Av. Paulista', price: 260, color: '#FFFF00' },
   { name: 'Sorte ou Revés', type: 'chance' },
-  { name: 'Brooklin' },
+  { name: 'Brooklin', price: 280, color: '#FFFF00' },
   { name: 'Vá para a Prisão', type: 'gotojail' },
-  { name: 'Campo Grande' },
-  { name: 'Bangu' },
+  { name: 'Campo Grande', price: 300, color: '#008000' },
+  { name: 'Bangu', price: 300, color: '#008000' },
   { name: 'Sorte ou Revés', type: 'chance' },
-  { name: 'Botafogo' },
+  { name: 'Botafogo', price: 320, color: '#008000' },
   { name: 'Companhia de Aviões', type: 'transport' },
-  { name: 'Aterro do Flamengo' },
+  { name: 'Aterro do Flamengo', price: 350, color: '#0000FF' },
   { name: 'Imposto de Renda', type: 'tax' },
-  { name: 'Ipanema' },
-  { name: 'Jardim Leblon' }
+  { name: 'Ipanema', price: 400, color: '#0000FF' },
+  { name: 'Jardim Leblon', price: 450, color: '#0000FF' }
 ];
 
 function loadPlayers() {
@@ -74,7 +74,16 @@ function createBoard() {
     const label = document.createElement('span');
     label.className = 'name';
     label.textContent = squares[i].name;
+    if (squares[i].color) {
+      square.style.borderTop = '0.5vmin solid ' + squares[i].color;
+    }
     square.appendChild(label);
+    if (squares[i].price) {
+      const price = document.createElement('span');
+      price.className = 'price';
+      price.textContent = '$' + squares[i].price;
+      square.appendChild(price);
+    }
     square.addEventListener('click', () => {
       if (!playerIdParam || playerIdParam === 'bank') return;
       const player = players.find((p) => p.id === playerIdParam);
@@ -91,8 +100,10 @@ function renderBoard() {
   for (let i = 0; i < 40; i++) {
     const square = document.getElementById('sq' + i);
     const label = square.querySelector('.name');
+    const price = square.querySelector('.price');
     square.innerHTML = '';
     square.appendChild(label);
+    if (price) square.appendChild(price);
   }
   players.forEach((p) => {
     const token = document.createElement('div');
@@ -121,7 +132,7 @@ function movePlayer(id, steps) {
 }
 
 function setupBankerControls() {
-  const controls = document.getElementById('bankerSidebar');
+  const controls = document.getElementById('sidebar');
   const addForm = document.createElement('div');
   addForm.innerHTML =
     '<input id="newPlayerName" placeholder="Nome"> <button id="addPlayer">Adicionar</button>';
@@ -180,7 +191,7 @@ function updateBankerList() {
 }
 
 function setupPlayerControls(id) {
-  const controls = document.getElementById('playerSidebar');
+  const controls = document.getElementById('sidebar');
   const info = document.createElement('div');
   info.id = 'playerInfo';
   controls.appendChild(info);
@@ -252,7 +263,7 @@ function showPropertyModal(index, player) {
   const infoEl = document.getElementById('modalInfo');
   const buyBtn = document.getElementById('buyBtn');
   const square = squares[index];
-  const price = square.price || 100 + index * 10;
+  const price = square.price || 0;
   nameEl.textContent = square.name;
   infoEl.textContent = `Preço: ${price}`;
   const owned = player.properties.includes(square.name);
@@ -294,13 +305,11 @@ loadPlayers();
 renderBoard();
 document.getElementById('closeModal').addEventListener('click', hideModal);
 
+const sidebar = document.getElementById('sidebar');
 if (playerIdParam === 'bank') {
-  document.getElementById('playerSidebar').style.display = 'none';
   setupBankerControls();
 } else if (playerIdParam) {
-  document.getElementById('bankerSidebar').style.display = 'none';
   setupPlayerControls(playerIdParam);
-} else {
-  document.getElementById('bankerSidebar').style.display = 'none';
-  document.getElementById('playerSidebar').style.display = 'none';
+} else if (sidebar) {
+  sidebar.textContent = 'Acesse com ?player=bank para o banqueiro ou ?player=<id> para jogador.';
 }
